@@ -1,39 +1,15 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
 const client = new Anthropic();
 
-// 20 requests per hour per IP
-// In-memory: resets on cold start, but effective for basic abuse protection
-const LIMIT = 20;
-const WINDOW_MS = 60 * 60 * 1000;
-
-type Entry = { count: number; resetAt: number };
-const store = new Map<string, Entry>();
-
-function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
-  const now = Date.now();
-
-  // Periodically clear expired entries to prevent memory bloat
-  if (store.size > 500) {
-    for (const [key, val] of store) {
-      if (now > val.resetAt) store.delete(key);
-    }
-  }
-
-  const entry = store.get(ip);
-
-  if (!entry || now > entry.resetAt) {
-    store.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return { allowed: true, remaining: LIMIT - 1 };
-  }
-
-  if (entry.count >= LIMIT) {
-    return { allowed: false, remaining: 0 };
-  }
-
-  entry.count++;
-  return { allowed: true, remaining: LIMIT - entry.count };
-}
+// 20 requests per hour per IP, shared across all serverless instances
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(20, "1 h"),
+  analytics: true,
+});
 
 const SYSTEM_PROMPT = `You are the Hot Girls Code AI tutor — a warm, encouraging, and brilliant coding mentor. Your vibe: brilliant best friend who happens to be an amazing engineer. You make coding feel exciting and accessible, not intimidating.
 
@@ -53,11 +29,11 @@ export async function POST(req: Request) {
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
     req.headers.get("x-real-ip") ??
-    "unknown";
+    "anonymous";
 
-  const { allowed, remaining } = checkRateLimit(ip);
+  const { success, remaining } = await ratelimit.limit(ip);
 
-  if (!allowed) {
+  if (!success) {
     return new Response(
       JSON.stringify({ error: "Rate limit reached. Try again in an hour." }),
       {
