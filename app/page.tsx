@@ -51,15 +51,56 @@ function MarkdownText({ text }: { text: string }) {
 }
 
 const TICKER_ITEMS = [
-  "A graph is just a spreadsheet ✦",
-  "An algorithm is just a recipe ✦",
-  "Women couldn't have credit cards until 1974 ✦",
-  "Ada Lovelace wrote the first algorithm ✦",
-  "You don't need a CS degree to build ✦",
-  "The best time to learn was yesterday ✦",
-  "Hot girls ship on Fridays ✦",
-  "Code is just instructions, written down ✦",
-  "Every expert was once a beginner ✦",
+  "Megan Thee Stallion has a CS degree",
+  "A graph is just a spreadsheet",
+  "An algorithm is just a recipe",
+  "Women couldn't have credit cards until 1974",
+  "The gap is cultural, not intellectual",
+  "AI means anyone can build anything",
+  "You were always technical enough",
+];
+
+const MANIFESTO = [
+  {
+    num: "01",
+    text: "The gender gap in tech is a cultural artifact, not a fact of nature. Women were literally blocked from financial independence until 1974.",
+  },
+  {
+    num: "02",
+    text: 'Being \u201ctechnical\u201d is a skill you learn, not a trait you\'re born with. Nobody came out of the womb knowing Python.',
+  },
+  {
+    num: "03",
+    text: "With AI, the bar has never been lower. If you can describe it, you can build it. That's not an exaggeration.",
+  },
+  {
+    num: "04",
+    text: "The boys' club exists because of a 50-year head start in encouragement. Not because they're better at math. You beat them in 4th grade and you know it.",
+  },
+];
+
+const DEMO = {
+  user: "I want to build an app where people can vote on where to eat with their friends",
+  assistant: `Yes — and this is genuinely a great idea because group dinner decisions are a real pain point that nobody has solved elegantly for friend groups.
+
+What you're building is called a voting app — think of it like a group poll, but for restaurants. Here's how you'd actually make it:
+
+**Step 1**
+Start with a simple webpage that lets one person add restaurant options. Think of it like a Google Form, but you're the one building it.
+
+**Step 2**
+Add a shareable link so friends can click in and vote. This is just a URL — the same way you share a Google Doc.
+
+**Step 3**
+Show the results live. A bar chart is just numbers displayed as rectangles — nothing scary about that.
+
+You could have a working version of this in a weekend. Seriously.`,
+};
+
+const DEMO_CHIPS = [
+  "How long will this take?",
+  "What tools do I need?",
+  "Break step 1 down more",
 ];
 
 const SUGGESTIONS = [
@@ -77,7 +118,8 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [streamingText, setStreamingText] = useState("");
   const [showChat, setShowChat] = useState(false);
-  const chatRef = useRef<HTMLDivElement>(null);
+  const manifestoRef = useRef<HTMLDivElement>(null);
+  const toolRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -88,14 +130,17 @@ export default function Home() {
   function handleBuildClick() {
     setShowChat(true);
     setTimeout(() => {
-      chatRef.current?.scrollIntoView({ behavior: "smooth" });
+      toolRef.current?.scrollIntoView({ behavior: "smooth" });
       inputRef.current?.focus();
     }, 100);
   }
 
+  function handleManifestoClick() {
+    manifestoRef.current?.scrollIntoView({ behavior: "smooth" });
+  }
+
   async function sendMessage(text: string) {
     if (!text.trim() || isLoading) return;
-
     if (!showChat) setShowChat(true);
 
     const userMessage: Message = { role: "user", content: text.trim() };
@@ -106,7 +151,7 @@ export default function Home() {
     setStreamingText("");
 
     setTimeout(() => {
-      chatRef.current?.scrollIntoView({ behavior: "smooth" });
+      toolRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 100);
 
     try {
@@ -166,7 +211,7 @@ export default function Home() {
           hot girls <span className="text-pink-500 italic">code</span>
         </div>
         <nav className="flex items-center gap-8 text-sm text-stone-500">
-          <a href="#" className="hover:text-stone-900 transition-colors">about</a>
+          <button onClick={handleManifestoClick} className="hover:text-stone-900 transition-colors">about</button>
           <button onClick={handleBuildClick} className="hover:text-stone-900 transition-colors">build something</button>
           <a href="#" className="hover:text-stone-900 transition-colors">community</a>
         </nav>
@@ -194,7 +239,10 @@ export default function Home() {
           >
             Build something now
           </button>
-          <button className="px-6 py-3 border border-stone-300 text-stone-700 rounded-full text-sm font-medium hover:border-stone-500 transition-colors">
+          <button
+            onClick={handleManifestoClick}
+            className="px-6 py-3 border border-stone-300 text-stone-700 rounded-full text-sm font-medium hover:border-stone-500 transition-colors"
+          >
             Read the manifesto
           </button>
         </div>
@@ -202,39 +250,64 @@ export default function Home() {
 
       {/* Ticker */}
       <div className="border-y border-stone-200 py-3 overflow-hidden bg-[#f5f0eb]">
-        <div className="flex gap-12 animate-marquee whitespace-nowrap">
+        <div className="flex gap-10 animate-marquee whitespace-nowrap">
           {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
             <span key={i} className="text-sm text-stone-400 font-medium flex-shrink-0">
-              {item}
+              {item} <span className="text-pink-300">✳</span>
             </span>
           ))}
         </div>
       </div>
 
-      {/* Chat section */}
-      {showChat && (
-        <section ref={chatRef} className="border-t border-stone-200 bg-white">
-          <div className="max-w-3xl mx-auto px-6 py-10">
-            <h2 className="text-2xl font-bold mb-2">Let&apos;s build something.</h2>
-            <p className="text-stone-500 text-sm mb-8">Tell me what you want to learn or build — I&apos;ll walk you through it step by step.</p>
-
-            {/* Suggestion chips */}
-            {messages.length === 0 && (
-              <div className="flex flex-wrap gap-2 mb-6">
-                {SUGGESTIONS.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => sendMessage(s)}
-                    disabled={isLoading}
-                    className="text-sm px-3 py-1.5 rounded-full border border-stone-200 text-stone-500 hover:border-pink-300 hover:text-pink-600 hover:bg-pink-50 transition-all disabled:opacity-40"
-                  >
-                    {s}
-                  </button>
-                ))}
+      {/* Manifesto */}
+      <section ref={manifestoRef} className="border-b border-stone-200 bg-[#f5f0eb] px-6 py-20">
+        <div className="max-w-3xl mx-auto">
+          <p className="text-xs font-semibold tracking-[0.2em] text-pink-500 uppercase mb-12">
+            things that are actually true
+          </p>
+          <div className="space-y-10">
+            {MANIFESTO.map(({ num, text }) => (
+              <div key={num} className="flex gap-8 items-start">
+                <span className="text-4xl font-bold text-stone-200 leading-none flex-shrink-0 w-12">{num}</span>
+                <p className="text-stone-700 text-lg leading-relaxed pt-1">{text}</p>
               </div>
-            )}
+            ))}
+          </div>
+        </div>
+      </section>
 
-            {/* Messages */}
+      {/* The Tool */}
+      <section ref={toolRef} className="border-b border-stone-200 bg-white">
+        <div className="max-w-3xl mx-auto px-6 py-16">
+          <p className="text-xs font-semibold tracking-[0.2em] text-pink-500 uppercase mb-4">
+            the tool
+          </p>
+          <h2 className="text-3xl font-bold mb-3">Type anything. We&apos;ll break it down.</h2>
+          <p className="text-stone-500 text-base mb-10 leading-relaxed">
+            No jargon. No gatekeeping. Just your idea and a step-by-step path to building it.
+          </p>
+
+          {/* Static demo (shown when no real conversation yet) */}
+          {messages.length === 0 && !isLoading && (
+            <div className="space-y-6 mb-8 opacity-70">
+              <div className="flex justify-end">
+                <div className="max-w-[80%] bg-stone-100 border border-stone-200 rounded-2xl px-4 py-3 text-sm text-stone-800">
+                  {DEMO.user}
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <div className="w-7 h-7 rounded-full bg-pink-500 flex-shrink-0 mt-1 flex items-center justify-center text-white text-xs font-bold">
+                  ✦
+                </div>
+                <div className="max-w-[85%] text-sm text-stone-600 leading-relaxed">
+                  <MarkdownText text={DEMO.assistant} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Real messages */}
+          {(messages.length > 0 || isLoading) && (
             <div className="space-y-6 mb-6">
               {messages.map((msg, i) => (
                 <div key={i} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
@@ -280,38 +353,79 @@ export default function Home() {
 
               <div ref={bottomRef} />
             </div>
+          )}
 
-            {/* Input */}
-            <form onSubmit={handleSubmit}>
-              <div className="relative rounded-2xl border border-stone-200 bg-stone-50 focus-within:border-pink-300 focus-within:bg-white transition-all">
-                <textarea
-                  ref={inputRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="What do you want to build or learn?"
-                  rows={1}
-                  disabled={isLoading}
-                  className="w-full bg-transparent px-4 py-3.5 pr-14 text-sm text-stone-800 placeholder-stone-400 resize-none outline-none leading-relaxed max-h-36 overflow-y-auto disabled:opacity-50"
-                />
+          {/* Quick chips — demo chips when empty, suggestion chips after first message */}
+          {messages.length === 0 && (
+            <div className="flex flex-wrap gap-2 mb-6">
+              {DEMO_CHIPS.map((s) => (
                 <button
-                  type="submit"
-                  disabled={isLoading || !input.trim()}
-                  className="absolute right-2.5 bottom-2.5 w-8 h-8 rounded-xl bg-stone-900 flex items-center justify-center hover:bg-stone-700 disabled:opacity-30 transition-all"
+                  key={s}
+                  onClick={() => sendMessage(s)}
+                  disabled={isLoading}
+                  className="text-sm px-3 py-1.5 rounded-full border border-stone-200 text-stone-500 hover:border-pink-300 hover:text-pink-600 hover:bg-pink-50 transition-all disabled:opacity-40"
                 >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 2L11 13" /><path d="M22 2L15 22 11 13 2 9l20-7z" />
-                  </svg>
+                  {s}
                 </button>
-              </div>
-              <p className="text-center text-stone-400 text-xs mt-2">Enter to send · Shift+Enter for new line</p>
-            </form>
-          </div>
-        </section>
-      )}
+              ))}
+              {SUGGESTIONS.slice(0, 3).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => sendMessage(s)}
+                  disabled={isLoading}
+                  className="text-sm px-3 py-1.5 rounded-full border border-stone-200 text-stone-500 hover:border-pink-300 hover:text-pink-600 hover:bg-pink-50 transition-all disabled:opacity-40"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
 
-      <footer className="px-8 py-6 text-center text-xs text-stone-400 border-t border-stone-200">
-        hotgirlscode.codes — powered by Claude
+          {/* Input */}
+          <form onSubmit={handleSubmit}>
+            <div className="relative rounded-2xl border border-stone-200 bg-stone-50 focus-within:border-pink-300 focus-within:bg-white transition-all">
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Type your idea or ask anything..."
+                rows={1}
+                disabled={isLoading}
+                className="w-full bg-transparent px-4 py-3.5 pr-14 text-sm text-stone-800 placeholder-stone-400 resize-none outline-none leading-relaxed max-h-36 overflow-y-auto disabled:opacity-50"
+              />
+              <button
+                type="submit"
+                disabled={isLoading || !input.trim()}
+                className="absolute right-2.5 bottom-2.5 w-8 h-8 rounded-xl bg-stone-900 flex items-center justify-center hover:bg-stone-700 disabled:opacity-30 transition-all"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 2L11 13" /><path d="M22 2L15 22 11 13 2 9l20-7z" />
+                </svg>
+              </button>
+            </div>
+            <p className="text-center text-stone-400 text-xs mt-2">Enter to send · Shift+Enter for new line</p>
+          </form>
+        </div>
+      </section>
+
+      {/* Quote */}
+      <section className="bg-[#f5f0eb] border-b border-stone-200 px-6 py-16 text-center">
+        <blockquote className="max-w-2xl mx-auto text-stone-500 text-lg leading-relaxed italic">
+          &ldquo;Making a for loop doesn&apos;t require a specific kind of brain. It requires someone who believed they could — and someone who told them they could too.&rdquo;
+        </blockquote>
+      </section>
+
+      <footer className="px-8 py-8 border-t border-stone-200 bg-[#f5f0eb]">
+        <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div className="text-sm font-semibold text-stone-900">
+            hot girls <span className="text-pink-500 italic">code</span>
+            <span className="text-stone-400 font-normal ml-2">— because we always did</span>
+          </div>
+          <p className="text-xs text-stone-400">
+            hotgirlscode.codes — built by a girl who was told she wasn&apos;t technical enough
+          </p>
+        </div>
       </footer>
     </div>
   );
