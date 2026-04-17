@@ -213,7 +213,7 @@ export default function Home() {
         <nav className="flex items-center gap-8 text-sm text-stone-500">
           <button onClick={handleManifestoClick} className="hover:text-stone-900 transition-colors">about</button>
           <button onClick={handleBuildClick} className="hover:text-stone-900 transition-colors">build something</button>
-          <a href="#" className="hover:text-stone-900 transition-colors">community</a>
+          <a href="https://join.slack.com/t/hotgirlscode/shared_invite/zt-3vlkg20qd-trS4pRl6_ToEEhuz~lMzkA" target="_blank" rel="noopener noreferrer" className="hover:text-stone-900 transition-colors">community</a>
         </nav>
       </header>
 
@@ -355,9 +355,16 @@ export default function Home() {
             </div>
           )}
 
-          {/* Quick chips — demo chips when empty, suggestion chips after first message */}
+          {/* Quick chips — demo chips when empty */}
           {messages.length === 0 && (
             <div className="flex flex-wrap gap-2 mb-6">
+              <button
+                onClick={() => sendMessage("I'm completely new to coding and computers. I've never done this before. Can you help me figure out where to start?")}
+                disabled={isLoading}
+                className="text-sm px-3 py-1.5 rounded-full border border-pink-300 text-pink-600 bg-pink-50 hover:bg-pink-100 transition-all disabled:opacity-40 font-medium"
+              >
+                ✦ I&apos;m totally new — start here
+              </button>
               {DEMO_CHIPS.map((s) => (
                 <button
                   key={s}
@@ -406,6 +413,32 @@ export default function Home() {
             </div>
             <p className="text-center text-stone-400 text-xs mt-2">Enter to send · Shift+Enter for new line</p>
           </form>
+        </div>
+      </section>
+
+      {/* Community */}
+      <section className="bg-stone-900 px-6 py-20 text-center">
+        <div className="max-w-xl mx-auto">
+          <p className="text-xs font-semibold tracking-[0.2em] text-pink-400 uppercase mb-4">community</p>
+          <h2 className="text-3xl font-bold text-white mb-4">You&apos;re not doing this alone.</h2>
+          <p className="text-stone-400 text-base leading-relaxed mb-8">
+            Join the Slack — share what you&apos;re building, ask for help, drop helpful links, and celebrate wins with people who get it.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center text-sm text-stone-500 mb-8">
+            <span className="flex items-center gap-2"><span className="text-pink-400">#</span>resources — helpful links & tools</span>
+            <span className="hidden sm:block text-stone-700">·</span>
+            <span className="flex items-center gap-2"><span className="text-pink-400">#</span>help — get unstuck</span>
+            <span className="hidden sm:block text-stone-700">·</span>
+            <span className="flex items-center gap-2"><span className="text-pink-400">#</span>wins — share what you built</span>
+          </div>
+          <a
+            href="https://join.slack.com/t/hotgirlscode/shared_invite/zt-3vlkg20qd-trS4pRl6_ToEEhuz~lMzkA"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block px-8 py-3 bg-pink-500 text-white rounded-full text-sm font-medium hover:bg-pink-600 transition-colors"
+          >
+            Join the community →
+          </a>
         </div>
       </section>
 
