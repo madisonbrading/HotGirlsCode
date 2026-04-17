@@ -96,6 +96,12 @@ export default function Home() {
         body: JSON.stringify({ messages: newMessages }),
       });
 
+      if (res.status === 429) {
+        setMessages([...newMessages, { role: "assistant", content: "You've hit the hourly limit (20 messages). Come back in a bit!" }]);
+        setStreamingText("");
+        setIsLoading(false);
+        return;
+      }
       if (!res.ok) throw new Error("Request failed");
 
       const reader = res.body!.getReader();
